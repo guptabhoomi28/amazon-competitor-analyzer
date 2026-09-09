@@ -1,5 +1,5 @@
-from app.oxylabs import scrape_product , search_amazon
-from app.database import get_product, insert_product , get_competitors
+from app.oxylabs import scrape_product, search_amazon
+from app.database import get_product, get_competitors, insert_product
 from app.llm import build_analysis_prompt, call_llm
 from datetime import datetime, timedelta
 

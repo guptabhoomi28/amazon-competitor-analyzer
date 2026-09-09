@@ -1,4 +1,5 @@
 import os 
+from app.config import get_secret
 
 import requests
 from dotenv import load_dotenv

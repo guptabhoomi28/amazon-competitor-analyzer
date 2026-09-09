@@ -1,4 +1,5 @@
 import os
+from app.config import get_secret
 import requests
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -21,7 +22,7 @@ class ProductAnalysis(BaseModel):
 
 
 def call_llm(prompt: str) -> ProductAnalysis:
-    api_key = os.getenv("OPENROUTER_API_KEY")
+    api_key = get_secret("OPENROUTER_API_KEY")
 
     if not api_key:
         raise LLMError("OPENROUTER_API_KEY is not set.")
