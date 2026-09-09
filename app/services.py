@@ -1,5 +1,6 @@
 from oxylabs import scrape_product , search_amazon
-from database import get_product, insert_product
+from database import get_product, insert_product , get_competitors
+from llm import build_analysis_prompt, call_llm
 
 def search_product(asin:str) -> dict:
 
@@ -14,7 +15,7 @@ def search_product(asin:str) -> dict:
     return product
 
 
-def find_competitors(query:str , orginal_asin:str) ->list:
+def find_competitors(query:str , orginal_asin:str) -> list:
     products = search_amazon(query)
 
     competitors =[]
@@ -51,3 +52,42 @@ def scrape_competitors(competitors:list , parent_asin:str) -> list:
         detailed_competitors.append(product)
 
     return detailed_competitors
+
+
+
+def analyze_product(asin:str):
+
+    asin = asin.strip()
+
+    product = get_product(asin)
+
+    if not product:
+        product = scrape_product(asin)
+        insert_product(product)
+
+    competitors = get_competitors(asin)
+
+    if not competitors:
+        search_results = find_competitors(
+            product['title'],
+            asin
+        )
+
+        competitors = scrape_competitors(
+            search_results,
+            asin
+        )
+
+    prompt = build_analysis_prompt(
+        product,
+        competitors
+    )
+
+    analysis = call_llm(prompt)
+
+    return {
+    "product": product,
+    "competitors": competitors,
+    "analysis": analysis
+    }
+

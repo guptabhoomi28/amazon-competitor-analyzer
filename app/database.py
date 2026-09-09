@@ -101,21 +101,6 @@ def get_product(asin:str):
         "url":row[8]
     }
 
-def get_product(asin:str):
-    connection =get_connection()
-
-    row = connection.execute(
-        """
-        SELECT * 
-        FROM products
-        WHERE asin = ?
-        """,
-        (asin,)
-    ).fetchone()
-
-    connection.close()
-
-    return row
 
 
 def get_competitors(parent_asin:str):
@@ -123,7 +108,17 @@ def get_competitors(parent_asin:str):
 
     rows = connection.execute(
         """
-        SELECT *
+        SELECT 
+            asin,
+            parent_asin,
+            title,
+            brand,
+            price,
+            currency,
+            rating,
+            reviews_count,
+            stock,
+            url
         FROM products
         WHERE parent_asin = ?
         """,
@@ -132,4 +127,20 @@ def get_competitors(parent_asin:str):
 
     connection.close()
 
-    return rows
+    competitors=[]
+
+    for row in rows :
+        competitors.append({
+             "asin": row[0],
+            "parent_asin": row[1],
+            "title": row[2],
+            "brand": row[3],
+            "price": row[4],
+            "currency": row[5],
+            "rating": row[6],
+            "reviews_count": row[7],
+            "stock": row[8],
+            "url": row[9]
+        })
+
+    return competitors

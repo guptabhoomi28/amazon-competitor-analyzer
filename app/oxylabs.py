@@ -7,7 +7,7 @@ load_dotenv()
 
 OXYLABS_URL = 'https://realtime.oxylabs.io/v1/queries'
 
-def normalize_product(content :dict) ->dict:
+def normalize_product(content :dict) -> dict:
     return {
         "asin" :content["asin"],
         "title" :content["title"],
@@ -51,7 +51,7 @@ def scrape_product(asin :str) -> dict:
     except requests.RequestException as error:
         raise RuntimeError(
             f"Oxylabs request failed :{error}"
-    )from error
+    )from error       #from error is used for Exception Chaining. It tells Python that the new error you are raising (RuntimeError) was directly caused by the original error (RequestException)
 
     data = response.json()
 
