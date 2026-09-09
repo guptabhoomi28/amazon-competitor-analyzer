@@ -2,23 +2,33 @@ import os
 
 import requests
 from dotenv import load_dotenv
+from app.exceptions import ScrapingError
 
 load_dotenv()
 
 OXYLABS_URL = 'https://realtime.oxylabs.io/v1/queries'
 
-def normalize_product(content :dict) -> dict:
+def normalize_product(content: dict) -> dict:
     return {
-        "asin" :content["asin"],
-        "title" :content["title"],
-        "brand" :content["brand"], 
-        "price" :content["price"],
-        "currency" :content["currency"],
-        "rating" :content["rating"],
-        "reviews_count":content["reviews_count"],
-        "stock":content["stock"],
-        "url":content["url"],
-        "images":content["images"]
+        "asin": content["asin"],
+        "title": content["title"],
+        "brand": content["brand"],
+        "price": content["price"],
+        "currency": content["currency"],
+        "rating": content["rating"],
+        "reviews_count": content["reviews_count"],
+        "stock": content["stock"],
+        "url": content["url"],
+        "images": content["images"],
+
+        "configuration": content.get("configuration"),
+        "screen_size": content.get("screen_size"),
+        "display_resolution": content.get("display_resolution_maximum"),
+        "refresh_rate": content.get("display_refresh_rate_in_hertz"),
+        "processor": content.get("processor_description"),
+        "battery_life": content.get("battery_average_life"),
+        "operating_system": content.get("operating_system"),
+        "included_components": content.get("included_components"),
     }
 
 def scrape_product(asin :str) -> dict:
@@ -30,6 +40,11 @@ def scrape_product(asin :str) -> dict:
     
     username = os.getenv("OXYLABS_USERNAME")
     password = os.getenv("OXYLABS_PASSWORD")
+
+    if not username or not password:
+        raise ScrapingError(
+            "Oxylabs credentials are not configured."
+    )
 
     payload ={
         "source" : "amazon_product",
@@ -49,21 +64,21 @@ def scrape_product(asin :str) -> dict:
         response.raise_for_status()
         
     except requests.RequestException as error:
-        raise RuntimeError(
+        raise ScrapingError(
             f"Oxylabs request failed :{error}"
     )from error       #from error is used for Exception Chaining. It tells Python that the new error you are raising (RuntimeError) was directly caused by the original error (RequestException)
 
     data = response.json()
 
     if not data.get('results'):
-        raise RuntimeError(
+        raise ScrapingError(
             f"No product data returned for ASIN: {asin}"
         )
 
     content = data['results'][0].get('content')
 
     if not content:
-        raise RuntimeError(
+        raise ScrapingError(
             f"No product content found for ASIN: {asin}"
         )
 
